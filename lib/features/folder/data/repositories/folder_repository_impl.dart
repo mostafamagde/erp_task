@@ -9,12 +9,15 @@ class FolderRepositoryImpl implements FolderRepository {
   FolderRepositoryImpl({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
+  String _getUserCollectionPath(String userId) => 'users/$userId/$_collection';
+
   @override
   Future<Folder> createFolder({
+    required String userId,
     required String name,
     String? parentId,
   }) async {
-    final docRef = _firestore.collection(_collection).doc();
+    final docRef = _firestore.collection(_getUserCollectionPath(userId)).doc();
     final now = DateTime.now();
     
     final folder = Folder(
@@ -37,11 +40,12 @@ class FolderRepositoryImpl implements FolderRepository {
 
   @override
   Future<Folder> updateFolder({
+    required String userId,
     required String id,
     required String name,
     String? parentId,
   }) async {
-    final docRef = _firestore.collection(_collection).doc(id);
+    final docRef = _firestore.collection(_getUserCollectionPath(userId)).doc(id);
     final now = DateTime.now();
 
     await docRef.update({
@@ -55,13 +59,13 @@ class FolderRepositoryImpl implements FolderRepository {
   }
 
   @override
-  Future<void> deleteFolder(String id) async {
-    await _firestore.collection(_collection).doc(id).delete();
+  Future<void> deleteFolder(String userId, String id) async {
+    await _firestore.collection(_getUserCollectionPath(userId)).doc(id).delete();
   }
 
   @override
-  Future<Folder> getFolder(String id) async {
-    final doc = await _firestore.collection(_collection).doc(id).get();
+  Future<Folder> getFolder(String userId, String id) async {
+    final doc = await _firestore.collection(_getUserCollectionPath(userId)).doc(id).get();
     if (!doc.exists) {
       throw Exception('Folder not found');
     }
@@ -69,8 +73,11 @@ class FolderRepositoryImpl implements FolderRepository {
   }
 
   @override
-  Future<List<Folder>> getFolders({String? parentId}) async {
-    Query query = _firestore.collection(_collection);
+  Future<List<Folder>> getFolders({
+    required String userId,
+    String? parentId,
+  }) async {
+    Query query = _firestore.collection(_getUserCollectionPath(userId));
     
     if (parentId != null) {
       query = query.where('parentId', isEqualTo: parentId);

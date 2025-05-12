@@ -47,9 +47,19 @@ class MyApp extends StatelessWidget {
             ),
           ),
           BlocProvider(
-            create: (context) => FolderCubit(
-              folderRepository: context.read<FolderRepositoryImpl>(),
-            ),
+            create: (context) {
+              final authState = context.read<AuthCubit>().state;
+              if (authState is AuthAuthenticated) {
+                return FolderCubit(
+                  folderRepository: context.read<FolderRepositoryImpl>(),
+                  userId: authState.user.id,
+                );
+              }
+              return FolderCubit(
+                folderRepository: context.read<FolderRepositoryImpl>(),
+                userId: '', // This will be updated when user logs in
+              );
+            },
           ),
         ],
         child: MaterialApp(
@@ -62,6 +72,8 @@ class MyApp extends StatelessWidget {
           home: BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
               if (state is AuthAuthenticated) {
+                // Update FolderCubit with new user ID when authenticated
+                context.read<FolderCubit>().loadFolders();
                 return const FolderPage();
               }
               return const LoginPage();

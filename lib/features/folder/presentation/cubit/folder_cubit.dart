@@ -87,15 +87,23 @@ class FolderError extends FolderState {
 // Cubit
 class FolderCubit extends Cubit<FolderState> {
   final FolderRepository _folderRepository;
+  final String _userId;
 
-  FolderCubit({required FolderRepository folderRepository})
-      : _folderRepository = folderRepository,
+  FolderCubit({
+    required FolderRepository folderRepository,
+    required String userId,
+  })  : _folderRepository = folderRepository,
+        _userId = userId,
         super(FolderInitial());
 
   Future<void> createFolder(String name, {String? parentId}) async {
     try {
       emit(FolderLoading());
-      await _folderRepository.createFolder(name: name, parentId: parentId);
+      await _folderRepository.createFolder(
+        userId: _userId,
+        name: name,
+        parentId: parentId,
+      );
       await loadFolders(parentId: parentId);
     } catch (e) {
       emit(FolderError(e.toString()));
@@ -106,6 +114,7 @@ class FolderCubit extends Cubit<FolderState> {
     try {
       emit(FolderLoading());
       await _folderRepository.updateFolder(
+        userId: _userId,
         id: id,
         name: name,
         parentId: parentId,
@@ -119,7 +128,7 @@ class FolderCubit extends Cubit<FolderState> {
   Future<void> deleteFolder(String id, {String? parentId}) async {
     try {
       emit(FolderLoading());
-      await _folderRepository.deleteFolder(id);
+      await _folderRepository.deleteFolder(_userId, id);
       await loadFolders(parentId: parentId);
     } catch (e) {
       emit(FolderError(e.toString()));
@@ -129,7 +138,10 @@ class FolderCubit extends Cubit<FolderState> {
   Future<void> loadFolders({String? parentId}) async {
     try {
       emit(FolderLoading());
-      final folders = await _folderRepository.getFolders(parentId: parentId);
+      final folders = await _folderRepository.getFolders(
+        userId: _userId,
+        parentId: parentId,
+      );
       emit(FoldersLoaded(folders));
     } catch (e) {
       emit(FolderError(e.toString()));
