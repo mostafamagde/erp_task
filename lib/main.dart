@@ -3,12 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'core/routes/app_router.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/pages/login_page.dart';
-import 'features/home/presentation/pages/home_page.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/folder/data/repositories/folder_repository_impl.dart';
+import 'features/folder/domain/repositories/folder_repository.dart';
+import 'features/folder/presentation/cubit/folder_cubit.dart';
+import 'features/folder/presentation/pages/folder_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,12 +33,22 @@ class MyApp extends StatelessWidget {
             googleSignIn: GoogleSignIn(),
           ),
         ),
+        RepositoryProvider(
+          create: (context) => FolderRepositoryImpl(
+            firestore: FirebaseFirestore.instance,
+          ),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
             create: (context) => AuthCubit(
               authRepository: context.read<AuthRepositoryImpl>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => FolderCubit(
+              folderRepository: context.read<FolderRepositoryImpl>(),
             ),
           ),
         ],
@@ -48,7 +62,7 @@ class MyApp extends StatelessWidget {
           home: BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
               if (state is AuthAuthenticated) {
-                return const HomePage();
+                return const FolderPage();
               }
               return const LoginPage();
             },

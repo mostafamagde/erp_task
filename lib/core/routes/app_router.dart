@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
-import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/folder/presentation/pages/folder_page.dart';
 
 class AppRouter {
   static const String initial = '/';
@@ -19,8 +19,9 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const SignUpPage());
       case forgotPassword:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordPage());
-      case home:
-        return MaterialPageRoute(builder: (_) => const HomePage());
+     case home:
+        return MaterialPageRoute(builder: (_) => const FolderPage());
+
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

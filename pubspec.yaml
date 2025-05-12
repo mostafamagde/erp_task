@@ -1,5 +1,5 @@
-name: erp_task
-description: "A new Flutter project."
+name: erp_tassk
+description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.3 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -53,6 +53,9 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_svg: ^2.1.0
   cached_network_image: ^3.4.1
+
+  # New dependency for folder management
+  cloud_firestore: ^5.6.7
 
 dev_dependencies:
   flutter_test:
