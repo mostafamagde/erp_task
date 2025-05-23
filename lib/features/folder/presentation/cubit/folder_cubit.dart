@@ -68,11 +68,12 @@ class FolderLoading extends FolderState {}
 
 class FoldersLoaded extends FolderState {
   final List<Folder> folders;
+  final String? searchQuery;
 
-  const FoldersLoaded(this.folders);
+  const FoldersLoaded(this.folders, {this.searchQuery});
 
   @override
-  List<Object> get props => [folders];
+  List<Object?> get props => [folders, searchQuery];
 }
 
 class FolderError extends FolderState {
@@ -88,6 +89,7 @@ class FolderError extends FolderState {
 class FolderCubit extends Cubit<FolderState> {
   final FolderRepository _folderRepository;
   final String _userId;
+  String? _currentSearchQuery;
 
   FolderCubit({
     required FolderRepository folderRepository,
@@ -135,6 +137,28 @@ class FolderCubit extends Cubit<FolderState> {
     }
   }
 
+  Future<void> searchFolders(String query) async {
+    try {
+      emit(FolderLoading());
+      _currentSearchQuery = query.isEmpty ? null : query;
+      final folders = await _folderRepository.getFolders(
+        userId: _userId,
+        parentId: null,
+      );
+      
+      if (_currentSearchQuery != null) {
+        final filteredFolders = folders.where((folder) =>
+          folder.name.toLowerCase().contains(_currentSearchQuery!.toLowerCase())
+        ).toList();
+        emit(FoldersLoaded(filteredFolders, searchQuery: _currentSearchQuery));
+      } else {
+        emit(FoldersLoaded(folders));
+      }
+    } catch (e) {
+      emit(FolderError(e.toString()));
+    }
+  }
+
   Future<void> loadFolders({String? parentId}) async {
     try {
       emit(FolderLoading());
@@ -142,9 +166,25 @@ class FolderCubit extends Cubit<FolderState> {
         userId: _userId,
         parentId: parentId,
       );
-      emit(FoldersLoaded(folders));
+      
+      if (_currentSearchQuery != null) {
+        final filteredFolders = folders.where((folder) =>
+          folder.name.toLowerCase().contains(_currentSearchQuery!.toLowerCase())
+        ).toList();
+        emit(FoldersLoaded(filteredFolders, searchQuery: _currentSearchQuery));
+      } else {
+        emit(FoldersLoaded(folders));
+      }
     } catch (e) {
       emit(FolderError(e.toString()));
+    }
+  }
+
+  Future<Folder> getFolder(String id) async {
+    try {
+      return await _folderRepository.getFolder(_userId, id);
+    } catch (e) {
+      throw Exception('Failed to get folder: ${e.toString()}');
     }
   }
 } 

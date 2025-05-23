@@ -1,28 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../file/presentation/pages/file_search_page.dart';
 import '../cubit/folder_cubit.dart';
 import '../../domain/entities/folder.dart';
 import '../../../file/presentation/cubit/file_cubit.dart';
 import '../../../file/presentation/pages/file_upload_page.dart';
 import '../../../file/presentation/pages/files_page.dart';
 
-class FolderPage extends StatelessWidget {
+class FolderPage extends StatefulWidget {
   final String? parentId;
 
   const FolderPage({super.key, this.parentId});
 
   @override
+  State<FolderPage> createState() => _FolderPageState();
+}
+
+class _FolderPageState extends State<FolderPage> {
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Folders'),
+        title: widget.parentId == null
+            ? _isSearching
+                ? TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search folders...',
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      context.read<FolderCubit>().searchFolders(value);
+                    },
+                  )
+                : const Text('Folders')
+            : FutureBuilder<Folder>(
+                future: context.read<FolderCubit>().getFolder(widget.parentId!),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Text('Loading...');
+                  }
+                  if (snapshot.hasError) {
+                    return const Text('Error');
+                  }
+                  return Text(snapshot.data?.name ?? 'Folder');
+                },
+              ),
         actions: [
-          if (parentId == null) // Only show create folder button in main folders page
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showCreateFolderDialog(context),
-          ),
-          if (parentId != null) // Only show upload button in folder view
+          if (widget.parentId ==
+              null) // Only show search and create folder buttons in main folders page
+            IconButton(
+              icon: Icon(_isSearching ? Icons.close : Icons.search),
+              onPressed: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) {
+                    _searchController.clear();
+                    context.read<FolderCubit>().searchFolders('');
+                  }
+                });
+              },
+            ),
+          if (widget.parentId == null &&
+              !_isSearching) // Only show create folder button when not searching
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _showCreateFolderDialog(context),
+            ),
+
+          if (widget.parentId != null)
+            IconButton(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FileSearchPage())),
+                icon: Icon(Icons.search)),
+
+          if (widget.parentId != null) // Only show upload button in folder view
             IconButton(
               icon: const Icon(Icons.upload_file),
               onPressed: () => _navigateToFileUpload(context),
@@ -31,29 +94,37 @@ class FolderPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          if (parentId == null) // Show folders list only in main folders page
+          if (widget.parentId ==
+              null) // Show folders list only in main folders page
             Expanded(
               child: BlocBuilder<FolderCubit, FolderState>(
-        builder: (context, state) {
-          if (state is FolderLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          if (state is FolderError) {
-            return Center(child: Text(state.message));
-          }
-          
-          if (state is FoldersLoaded) {
-            return _buildFolderList(context, state.folders);
-          }
-          
-          return const Center(child: Text('No folders found'));
-        },
+                builder: (context, state) {
+                  if (state is FolderLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (state is FolderError) {
+                    return Center(child: Text(state.message));
+                  }
+
+                  if (state is FoldersLoaded) {
+                    if (state.folders.isEmpty) {
+                      return Center(
+                        child: Text(state.searchQuery != null
+                            ? 'No folders found matching "${state.searchQuery}"'
+                            : 'No folders found'),
+                      );
+                    }
+                    return _buildFolderList(context, state.folders);
+                  }
+
+                  return const Center(child: Text('No folders found'));
+                },
               ),
             ),
-          if (parentId != null) // Show files in folder view
+          if (widget.parentId != null) // Show files in folder view
             Expanded(
-              child: FilesPage(folderId: parentId!),
+              child: FilesPage(folderId: widget.parentId!),
             ),
         ],
       ),
@@ -130,9 +201,9 @@ class FolderPage extends StatelessWidget {
             onPressed: () {
               if (controller.text.isNotEmpty) {
                 context.read<FolderCubit>().createFolder(
-                  controller.text,
-                  parentId: null, // Always create folders at root level
-                );
+                      controller.text,
+                      parentId: null, // Always create folders at root level
+                    );
                 Navigator.pop(context);
               }
             },
@@ -143,7 +214,8 @@ class FolderPage extends StatelessWidget {
     );
   }
 
-  Future<void> _showEditFolderDialog(BuildContext context, Folder folder) async {
+  Future<void> _showEditFolderDialog(
+      BuildContext context, Folder folder) async {
     final controller = TextEditingController(text: folder.name);
     return showDialog(
       context: context,
@@ -164,10 +236,10 @@ class FolderPage extends StatelessWidget {
             onPressed: () {
               if (controller.text.isNotEmpty) {
                 context.read<FolderCubit>().updateFolder(
-                  folder.id,
-                  controller.text,
-                  parentId: null, // Always update folders at root level
-                );
+                      folder.id,
+                      controller.text,
+                      parentId: null, // Always update folders at root level
+                    );
                 Navigator.pop(context);
               }
             },
@@ -178,7 +250,8 @@ class FolderPage extends StatelessWidget {
     );
   }
 
-  Future<void> _showDeleteConfirmation(BuildContext context, Folder folder) async {
+  Future<void> _showDeleteConfirmation(
+      BuildContext context, Folder folder) async {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -192,9 +265,9 @@ class FolderPage extends StatelessWidget {
           TextButton(
             onPressed: () {
               context.read<FolderCubit>().deleteFolder(
-                folder.id,
-                parentId: null, // Always delete folders at root level
-              );
+                    folder.id,
+                    parentId: null, // Always delete folders at root level
+                  );
               Navigator.pop(context);
             },
             child: const Text('Delete'),
@@ -208,8 +281,8 @@ class FolderPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FileUploadPage(folderId: parentId!),
+        builder: (context) => FileUploadPage(folderId: widget.parentId!),
       ),
     );
   }
-} 
+}

@@ -30,20 +30,7 @@ class _FilesPageState extends State<FilesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Files'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const FileSearchPage(),
-              ),
-            ),
-          ),
-        ],
-      ),
+
       body: BlocBuilder<FileCubit, FileState>(
         builder: (context, state) {
           if (state is FileLoading) {
