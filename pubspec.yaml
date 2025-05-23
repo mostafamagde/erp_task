@@ -36,13 +36,14 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # Firebase
-  firebase_core: ^3.13.0
-  firebase_auth: ^5.5.3
+  firebase_core: ^3.13.1
+  firebase_auth: ^5.5.4
   google_sign_in: ^6.3.0
 
   # State Management
   flutter_bloc: ^9.1.1
   equatable: ^2.0.7
+  file_picker: ^10.1.9
 
   # Utils
   get_it: ^8.0.3
@@ -55,7 +56,13 @@ dependencies:
   cached_network_image: ^3.4.1
 
   # New dependency for folder management
-  cloud_firestore: ^5.6.7
+  cloud_firestore: ^5.6.8
+
+  # Added from the code block
+  firebase_storage: ^12.4.6
+
+  # File handling
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
@@ -83,7 +90,7 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
+#  assets:
 #    - assets/images/
 #    - assets/icons/
 

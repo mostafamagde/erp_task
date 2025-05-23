@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/folder_cubit.dart';
 import '../../domain/entities/folder.dart';
+import '../../../file/presentation/cubit/file_cubit.dart';
+import '../../../file/presentation/pages/file_upload_page.dart';
+import '../../../file/presentation/pages/files_page.dart';
 
 class FolderPage extends StatelessWidget {
   final String? parentId;
@@ -14,13 +17,23 @@ class FolderPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Folders'),
         actions: [
+          if (parentId == null) // Only show create folder button in main folders page
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _showCreateFolderDialog(context),
           ),
+          if (parentId != null) // Only show upload button in folder view
+            IconButton(
+              icon: const Icon(Icons.upload_file),
+              onPressed: () => _navigateToFileUpload(context),
+            ),
         ],
       ),
-      body: BlocBuilder<FolderCubit, FolderState>(
+      body: Column(
+        children: [
+          if (parentId == null) // Show folders list only in main folders page
+            Expanded(
+              child: BlocBuilder<FolderCubit, FolderState>(
         builder: (context, state) {
           if (state is FolderLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -36,6 +49,13 @@ class FolderPage extends StatelessWidget {
           
           return const Center(child: Text('No folders found'));
         },
+              ),
+            ),
+          if (parentId != null) // Show files in folder view
+            Expanded(
+              child: FilesPage(folderId: parentId!),
+            ),
+        ],
       ),
     );
   }
@@ -111,7 +131,7 @@ class FolderPage extends StatelessWidget {
               if (controller.text.isNotEmpty) {
                 context.read<FolderCubit>().createFolder(
                   controller.text,
-                  parentId: parentId,
+                  parentId: null, // Always create folders at root level
                 );
                 Navigator.pop(context);
               }
@@ -146,7 +166,7 @@ class FolderPage extends StatelessWidget {
                 context.read<FolderCubit>().updateFolder(
                   folder.id,
                   controller.text,
-                  parentId: parentId,
+                  parentId: null, // Always update folders at root level
                 );
                 Navigator.pop(context);
               }
@@ -173,13 +193,22 @@ class FolderPage extends StatelessWidget {
             onPressed: () {
               context.read<FolderCubit>().deleteFolder(
                 folder.id,
-                parentId: parentId,
+                parentId: null, // Always delete folders at root level
               );
               Navigator.pop(context);
             },
             child: const Text('Delete'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _navigateToFileUpload(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FileUploadPage(folderId: parentId!),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'core/routes/app_router.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
@@ -13,6 +14,9 @@ import 'features/folder/data/repositories/folder_repository_impl.dart';
 import 'features/folder/domain/repositories/folder_repository.dart';
 import 'features/folder/presentation/cubit/folder_cubit.dart';
 import 'features/folder/presentation/pages/folder_page.dart';
+import 'features/file/data/repositories/file_repository_impl.dart';
+import 'features/file/domain/repositories/file_repository.dart';
+import 'features/file/presentation/cubit/file_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +42,12 @@ class MyApp extends StatelessWidget {
             firestore: FirebaseFirestore.instance,
           ),
         ),
+        RepositoryProvider(
+          create: (context) => FileRepositoryImpl(
+            firestore: FirebaseFirestore.instance,
+            storage: FirebaseStorage.instance,
+          ),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -56,7 +66,22 @@ class MyApp extends StatelessWidget {
                 );
               }
               return FolderCubit(
-                folderRepository: context.read<FolderRepositoryImpl>(),
+              folderRepository: context.read<FolderRepositoryImpl>(),
+                userId: '', // This will be updated when user logs in
+              );
+            },
+          ),
+          BlocProvider(
+            create: (context) {
+              final authState = context.read<AuthCubit>().state;
+              if (authState is AuthAuthenticated) {
+                return FileCubit(
+                  fileRepository: context.read<FileRepositoryImpl>(),
+                  userId: authState.user.id,
+                );
+              }
+              return FileCubit(
+                fileRepository: context.read<FileRepositoryImpl>(),
                 userId: '', // This will be updated when user logs in
               );
             },
