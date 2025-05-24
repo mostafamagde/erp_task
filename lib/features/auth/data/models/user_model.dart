@@ -1,29 +1,25 @@
-import 'package:injectable/injectable.dart';
 
-@Singleton()
-class UserModel  {
-  final String id;
-  final String email;
-  final String? displayName;
-  final String? photoURL;
-  final bool emailVerified;
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
-  const UserModel({
-    required this.id,
-    required this.email,
-    this.displayName,
-    this.photoURL,
-    this.emailVerified = false,
-  });
+class UserModel {
+  String? id;
+  String? email;
+  String? displayName;
+  String? photoURL;
+  bool? emailVerified;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      displayName: json['displayName'] as String?,
-      photoURL: json['photoURL'] as String?,
-      emailVerified: json['emailVerified'] as bool? ?? false,
-    );
+  UserModel._();
+
+  static final UserModel _singletonInstance = UserModel._();
+
+  static UserModel get instance => _singletonInstance;
+
+  void setFromFirebase(firebase_auth.User firebaseUser) {
+    id= firebaseUser.uid;
+    email= firebaseUser.email!;
+    displayName=firebaseUser.displayName;
+    photoURL= firebaseUser.photoURL;
+    emailVerified=firebaseUser.emailVerified;
   }
 
   Map<String, dynamic> toJson() {
@@ -35,5 +31,4 @@ class UserModel  {
       'emailVerified': emailVerified,
     };
   }
-
-  }
+}

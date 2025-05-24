@@ -1,9 +1,9 @@
+import 'package:erp_tassk/core/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/auth_cubit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'forgot_password_page.dart';
-import 'signup_page.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
               SnackBar(content: Text(state.message)),
             );
           } else if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushReplacementNamed(context, AppRouter.home);
           }
         },
         child: SafeArea(
@@ -109,12 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ForgotPasswordPage(),
-                            ),
-                          );
+                         Navigator.pushNamed(context, AppRouter.forgotPassword);
                         },
                         child: const Text('Forgot Password?'),
                       ),
@@ -174,12 +169,7 @@ class _LoginPageState extends State<LoginPage> {
                         const Text("Don't have an account?"),
                         TextButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SignUpPage(),
-                              ),
-                            );
+                            Navigator.pushNamed(context, AppRouter.signup);
                           },
                           child: const Text('Sign Up'),
                         ),

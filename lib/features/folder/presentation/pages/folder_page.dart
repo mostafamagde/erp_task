@@ -1,3 +1,4 @@
+import 'package:erp_tassk/core/routes/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../file/presentation/pages/file_search_page.dart';
@@ -157,11 +158,10 @@ class _FolderPageState extends State<FolderPage> {
             ],
           ),
           onTap: () {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                builder: (context) => FolderPage(parentId: folder.id),
-              ),
+              AppRouter.home
+
             );
           },
         );

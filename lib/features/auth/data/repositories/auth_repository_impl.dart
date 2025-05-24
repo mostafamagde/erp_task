@@ -26,7 +26,8 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
       );
-      return Right(_mapFirebaseUserToUser(userCredential.user!));
+    UserModel.instance.setFromFirebase(userCredential.user!);
+      return Right(UserModel.instance);
     } on firebase_auth.FirebaseAuthException catch (e) {
       return Left(AuthFailure(message: e.message ?? 'Authentication failed'));
     }
@@ -42,7 +43,8 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
       );
-      return Right(_mapFirebaseUserToUser(userCredential.user!));
+      UserModel.instance.setFromFirebase(userCredential.user!);
+      return Right(UserModel.instance);
     } on firebase_auth.FirebaseAuthException catch (e) {
       return Left(AuthFailure(message: e.message ?? 'Registration failed'));
     }
@@ -63,7 +65,8 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
-      return Right(_mapFirebaseUserToUser(userCredential.user!));
+      UserModel.instance.setFromFirebase(userCredential.user!);
+      return Right(UserModel.instance);
     } on firebase_auth.FirebaseAuthException catch (e) {
       return Left(AuthFailure(message: e.message ?? 'Google sign in failed'));
     }
@@ -102,21 +105,6 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  @override
-  Stream<UserModel?> get authStateChanges {
-    return _firebaseAuth.authStateChanges().map((firebaseUser) {
-      if (firebaseUser == null) return null;
-      return _mapFirebaseUserToUser(firebaseUser);
-    });
-  }
 
-  UserModel _mapFirebaseUserToUser(firebase_auth.User firebaseUser) {
-    return UserModel(
-      id: firebaseUser.uid,
-      email: firebaseUser.email!,
-      displayName: firebaseUser.displayName,
-      photoURL: firebaseUser.photoURL,
-      emailVerified: firebaseUser.emailVerified,
-    );
-  }
+
 } 

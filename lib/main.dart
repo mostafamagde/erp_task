@@ -1,22 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'core/routes/app_router.dart';
-import 'features/auth/data/repositories/auth_repository_impl.dart';
-import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/domain/repositories/auth_repository.dart';
-import 'features/folder/data/repositories/folder_repository_impl.dart';
-import 'features/folder/domain/repositories/folder_repository.dart';
-import 'features/folder/presentation/cubit/folder_cubit.dart';
-import 'features/folder/presentation/pages/folder_page.dart';
-import 'features/file/data/repositories/file_repository_impl.dart';
-import 'features/file/domain/repositories/file_repository.dart';
-import 'features/file/presentation/cubit/file_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,77 +14,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Create repository instances
-    final authRepository = AuthRepositoryImpl(
-      firebaseAuth: FirebaseAuth.instance,
-      googleSignIn: GoogleSignIn(),
-    );
-
-    final folderRepository = FolderRepositoryImpl(
-      firestore: FirebaseFirestore.instance,
-    );
-
-    final fileRepository = FileRepositoryImpl(
-      firestore: FirebaseFirestore.instance,
-      storage: FirebaseStorage.instance,
-    );
-
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => AuthCubit(
-            authRepository: authRepository,
-          ),
-        ),
-        BlocProvider(
-          create: (context) {
-            final authState = context.read<AuthCubit>().state;
-            if (authState is AuthAuthenticated) {
-              return FolderCubit(
-                folderRepository: folderRepository,
-                userId: authState.user.id,
-              );
-            }
-            return FolderCubit(
-              folderRepository: folderRepository,
-              userId: '', // This will be updated when user logs in
-            );
-          },
-        ),
-        BlocProvider(
-          create: (context) {
-            final authState = context.read<AuthCubit>().state;
-            if (authState is AuthAuthenticated) {
-              return FileCubit(
-                fileRepository: fileRepository,
-                userId: authState.user.id,
-              );
-            }
-            return FileCubit(
-              fileRepository: fileRepository,
-              userId: '', // This will be updated when user logs in
-            );
-          },
-        ),
-      ],
-      child: MaterialApp(
-        title: 'ERP Task',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-        ),
-        onGenerateRoute: AppRouter.generateRoute,
-        home: BlocBuilder<AuthCubit, AuthState>(
-          builder: (context, state) {
-            if (state is AuthAuthenticated) {
-              // Update FolderCubit with new user ID when authenticated
-              context.read<FolderCubit>().loadFolders();
-              return const FolderPage();
-            }
-            return const LoginPage();
-          },
-        ),
+    return MaterialApp(
+      title: 'ERP Task',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
+      onGenerateRoute: AppRouter.generateRoute,
+      debugShowCheckedModeBanner: false,
+
+
     );
   }
 }

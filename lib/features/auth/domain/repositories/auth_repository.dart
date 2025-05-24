@@ -21,5 +21,5 @@ abstract class AuthRepository {
 
   Future<Either<Failure, void>> sendEmailVerification();
 
-  Stream<UserModel?> get authStateChanges;
+
 } 
