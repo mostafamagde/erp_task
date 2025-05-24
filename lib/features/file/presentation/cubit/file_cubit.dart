@@ -1,15 +1,12 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import '../../domain/entities/file.dart';
 import '../../domain/repositories/file_repository.dart';
 
 // Events
-abstract class FileEvent extends Equatable {
+abstract class FileEvent   {
   const FileEvent();
 
-  @override
-  List<Object?> get props => [];
 }
 
 class UploadFile extends FileEvent {
@@ -27,8 +24,6 @@ class UploadFile extends FileEvent {
     required this.tags,
   });
 
-  @override
-  List<Object?> get props => [folderId, file, title, description, tags];
 }
 
 class DeleteFile extends FileEvent {
@@ -36,8 +31,6 @@ class DeleteFile extends FileEvent {
 
   const DeleteFile(this.fileId);
 
-  @override
-  List<Object> get props => [fileId];
 }
 
 class LoadFiles extends FileEvent {
@@ -45,9 +38,7 @@ class LoadFiles extends FileEvent {
 
   const LoadFiles(this.folderId);
 
-  @override
-  List<Object> get props => [folderId];
-}
+  }
 
 class SearchFiles extends FileEvent {
   final String query;
@@ -60,9 +51,7 @@ class SearchFiles extends FileEvent {
     this.fileType,
   });
 
-  @override
-  List<Object?> get props => [query, attribute, fileType];
-}
+  }
 
 class UpdateFile extends FileEvent {
   final String fileId;
@@ -77,8 +66,7 @@ class UpdateFile extends FileEvent {
     required this.tags,
   });
 
-  @override
-  List<Object?> get props => [fileId, title, description, tags];
+
 }
 
 class UploadNewVersion extends FileEvent {
@@ -90,8 +78,7 @@ class UploadNewVersion extends FileEvent {
     required this.file,
   });
 
-  @override
-  List<Object?> get props => [fileId, file];
+
 }
 
 class LoadVersionHistory extends FileEvent {
@@ -99,16 +86,13 @@ class LoadVersionHistory extends FileEvent {
 
   const LoadVersionHistory(this.fileId);
 
-  @override
-  List<Object> get props => [fileId];
 }
 
-// States
-abstract class FileState extends Equatable {
+//
+abstract class FileState   {
   const FileState();
 
-  @override
-  List<Object?> get props => [];
+
 }
 
 class FileInitial extends FileState {}
@@ -120,8 +104,6 @@ class FilesLoaded extends FileState {
 
   const FilesLoaded(this.files);
 
-  @override
-  List<Object> get props => [files];
 }
 
 class FileError extends FileState {
@@ -129,8 +111,7 @@ class FileError extends FileState {
 
   const FileError(this.message);
 
-  @override
-  List<Object> get props => [message];
+
 }
 
 // Cubit

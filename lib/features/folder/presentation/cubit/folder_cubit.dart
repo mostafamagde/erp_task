@@ -1,14 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
 import '../../domain/entities/folder.dart';
 import '../../domain/repositories/folder_repository.dart';
 
 // Events
-abstract class FolderEvent extends Equatable {
+abstract class FolderEvent   {
   const FolderEvent();
 
-  @override
-  List<Object?> get props => [];
 }
 
 class CreateFolder extends FolderEvent {
@@ -17,8 +14,6 @@ class CreateFolder extends FolderEvent {
 
   const CreateFolder({required this.name, this.parentId});
 
-  @override
-  List<Object?> get props => [name, parentId];
 }
 
 class UpdateFolder extends FolderEvent {
@@ -32,8 +27,7 @@ class UpdateFolder extends FolderEvent {
     this.parentId,
   });
 
-  @override
-  List<Object?> get props => [id, name, parentId];
+
 }
 
 class DeleteFolder extends FolderEvent {
@@ -41,8 +35,6 @@ class DeleteFolder extends FolderEvent {
 
   const DeleteFolder(this.id);
 
-  @override
-  List<Object> get props => [id];
 }
 
 class LoadFolders extends FolderEvent {
@@ -50,16 +42,14 @@ class LoadFolders extends FolderEvent {
 
   const LoadFolders({this.parentId});
 
-  @override
-  List<Object?> get props => [parentId];
+
 }
 
 // States
-abstract class FolderState extends Equatable {
+abstract class FolderState   {
   const FolderState();
 
-  @override
-  List<Object?> get props => [];
+
 }
 
 class FolderInitial extends FolderState {}
@@ -72,8 +62,7 @@ class FoldersLoaded extends FolderState {
 
   const FoldersLoaded(this.folders, {this.searchQuery});
 
-  @override
-  List<Object?> get props => [folders, searchQuery];
+
 }
 
 class FolderError extends FolderState {
@@ -81,8 +70,7 @@ class FolderError extends FolderState {
 
   const FolderError(this.message);
 
-  @override
-  List<Object> get props => [message];
+
 }
 
 // Cubit

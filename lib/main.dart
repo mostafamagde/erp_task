@@ -29,81 +29,75 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
+    // Create repository instances
+    final authRepository = AuthRepositoryImpl(
+      firebaseAuth: FirebaseAuth.instance,
+      googleSignIn: GoogleSignIn(),
+    );
+
+    final folderRepository = FolderRepositoryImpl(
+      firestore: FirebaseFirestore.instance,
+    );
+
+    final fileRepository = FileRepositoryImpl(
+      firestore: FirebaseFirestore.instance,
+      storage: FirebaseStorage.instance,
+    );
+
+    return MultiBlocProvider(
       providers: [
-        RepositoryProvider(
-          create: (context) => AuthRepositoryImpl(
-            firebaseAuth: FirebaseAuth.instance,
-            googleSignIn: GoogleSignIn(),
+        BlocProvider(
+          create: (context) => AuthCubit(
+            authRepository: authRepository,
           ),
         ),
-        RepositoryProvider(
-          create: (context) => FolderRepositoryImpl(
-            firestore: FirebaseFirestore.instance,
-          ),
+        BlocProvider(
+          create: (context) {
+            final authState = context.read<AuthCubit>().state;
+            if (authState is AuthAuthenticated) {
+              return FolderCubit(
+                folderRepository: folderRepository,
+                userId: authState.user.id,
+              );
+            }
+            return FolderCubit(
+              folderRepository: folderRepository,
+              userId: '', // This will be updated when user logs in
+            );
+          },
         ),
-        RepositoryProvider(
-          create: (context) => FileRepositoryImpl(
-            firestore: FirebaseFirestore.instance,
-            storage: FirebaseStorage.instance,
-          ),
+        BlocProvider(
+          create: (context) {
+            final authState = context.read<AuthCubit>().state;
+            if (authState is AuthAuthenticated) {
+              return FileCubit(
+                fileRepository: fileRepository,
+                userId: authState.user.id,
+              );
+            }
+            return FileCubit(
+              fileRepository: fileRepository,
+              userId: '', // This will be updated when user logs in
+            );
+          },
         ),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => AuthCubit(
-              authRepository: context.read<AuthRepositoryImpl>(),
-            ),
-          ),
-          BlocProvider(
-            create: (context) {
-              final authState = context.read<AuthCubit>().state;
-              if (authState is AuthAuthenticated) {
-                return FolderCubit(
-                  folderRepository: context.read<FolderRepositoryImpl>(),
-                  userId: authState.user.id,
-                );
-              }
-              return FolderCubit(
-              folderRepository: context.read<FolderRepositoryImpl>(),
-                userId: '', // This will be updated when user logs in
-              );
-            },
-          ),
-          BlocProvider(
-            create: (context) {
-              final authState = context.read<AuthCubit>().state;
-              if (authState is AuthAuthenticated) {
-                return FileCubit(
-                  fileRepository: context.read<FileRepositoryImpl>(),
-                  userId: authState.user.id,
-                );
-              }
-              return FileCubit(
-                fileRepository: context.read<FileRepositoryImpl>(),
-                userId: '', // This will be updated when user logs in
-              );
-            },
-          ),
-        ],
-        child: MaterialApp(
-          title: 'ERP Task',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            useMaterial3: true,
-          ),
-          onGenerateRoute: AppRouter.generateRoute,
-          home: BlocBuilder<AuthCubit, AuthState>(
-            builder: (context, state) {
-              if (state is AuthAuthenticated) {
-                // Update FolderCubit with new user ID when authenticated
-                context.read<FolderCubit>().loadFolders();
-                return const FolderPage();
-              }
-              return const LoginPage();
-            },
-          ),
+      child: MaterialApp(
+        title: 'ERP Task',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+        ),
+        onGenerateRoute: AppRouter.generateRoute,
+        home: BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, state) {
+            if (state is AuthAuthenticated) {
+              // Update FolderCubit with new user ID when authenticated
+              context.read<FolderCubit>().loadFolders();
+              return const FolderPage();
+            }
+            return const LoginPage();
+          },
         ),
       ),
     );

@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
-import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/user_model.dart';
-
+@Injectable(as : AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
@@ -17,7 +17,7 @@ class AuthRepositoryImpl implements AuthRepository {
         _googleSignIn = googleSignIn;
 
   @override
-  Future<Either<Failure, User>> signInWithEmailAndPassword({
+  Future<Either<Failure, UserModel>> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
@@ -33,7 +33,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> signUpWithEmailAndPassword({
+  Future<Either<Failure, UserModel>> signUpWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
@@ -49,7 +49,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, User>> signInWithGoogle() async {
+  Future<Either<Failure, UserModel>> signInWithGoogle() async {
     try {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
@@ -103,15 +103,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Stream<User?> get authStateChanges {
+  Stream<UserModel?> get authStateChanges {
     return _firebaseAuth.authStateChanges().map((firebaseUser) {
       if (firebaseUser == null) return null;
       return _mapFirebaseUserToUser(firebaseUser);
     });
   }
 
-  User _mapFirebaseUserToUser(firebase_auth.User firebaseUser) {
-    return User(
+  UserModel _mapFirebaseUserToUser(firebase_auth.User firebaseUser) {
+    return UserModel(
       id: firebaseUser.uid,
       email: firebaseUser.email!,
       displayName: firebaseUser.displayName,

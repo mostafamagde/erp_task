@@ -1,6 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 
-class UserModel extends Equatable {
+@Singleton()
+class UserModel  {
   final String id;
   final String email;
   final String? displayName;
@@ -35,6 +36,4 @@ class UserModel extends Equatable {
     };
   }
 
-  @override
-  List<Object?> get props => [id, email, displayName, photoURL, emailVerified];
-} 
+  }

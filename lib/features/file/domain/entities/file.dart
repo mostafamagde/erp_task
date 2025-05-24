@@ -1,6 +1,5 @@
-import 'package:equatable/equatable.dart';
 
-class FileVersion extends Equatable {
+class FileVersion   {
   final String version;
   final String url;
   final DateTime createdAt;
@@ -13,11 +12,9 @@ class FileVersion extends Equatable {
     required this.uploadedBy,
   });
 
-  @override
-  List<Object?> get props => [version, url, createdAt, uploadedBy];
 }
 
-class FileEntity extends Equatable {
+class FileEntity   {
   final String id;
   final String name;
   final String title;
@@ -46,19 +43,5 @@ class FileEntity extends Equatable {
     required this.versions,
   });
 
-  @override
-  List<Object?> get props => [
-        id,
-        name,
-        title,
-        description,
-        tags,
-        url,
-        type,
-        folderId,
-        createdAt,
-        updatedAt,
-        currentVersion,
-        versions,
-      ];
+
 } 
