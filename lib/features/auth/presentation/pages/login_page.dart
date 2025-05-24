@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
               SnackBar(content: Text(state.message)),
             );
           } else if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, AppRouter.home);
+            Navigator.pushReplacementNamed(context, AppRouter.folder);
           }
         },
         child: SafeArea(

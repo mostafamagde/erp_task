@@ -1,4 +1,5 @@
 import 'package:erp_tassk/core/di/di.dart';
+import 'package:erp_tassk/features/auth/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,7 +24,7 @@ class AppRouter {
   static const String login = '/';
   static const String signup = '/signup';
   static const String forgotPassword = '/forgot-password';
-  static const String home = '/home';
+  static const String folder = '/home';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -66,15 +67,15 @@ class AppRouter {
           ),
         );
 
-      case home:
+      case folder:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
             create: (context) => FolderCubit(
               folderRepository: FolderRepositoryImpl(
                 firestore: FirebaseFirestore.instance,
               ),
-              userId: FirebaseAuth.instance.currentUser?.uid ?? '',
-            ),
+              userId: UserModel.instance.id ?? '',
+            )..loadFolders(),
             child: const FolderPage(),
           ),
         );

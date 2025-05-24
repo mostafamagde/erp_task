@@ -160,7 +160,7 @@ class _FolderPageState extends State<FolderPage> {
           onTap: () {
             Navigator.pushNamed(
               context,
-              AppRouter.home
+              AppRouter.folder
 
             );
           },
