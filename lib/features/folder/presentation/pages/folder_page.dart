@@ -193,7 +193,7 @@ class _FolderPageState extends State<FolderPage> {
         _showEditFolderDialog(context, folder,context.read<FolderCubit>());
         break;
       case 'delete':
-        _showDeleteConfirmation(context, folder);
+        _showDeleteConfirmation(context, folder,context.read<FolderCubit>());
         break;
     }
   }
@@ -269,7 +269,7 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   Future<void> _showDeleteConfirmation(
-      BuildContext context, Folder folder) async {
+      BuildContext context, Folder folder, FolderCubit cubit) async {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -282,7 +282,7 @@ class _FolderPageState extends State<FolderPage> {
           ),
           TextButton(
             onPressed: () {
-              context.read<FolderCubit>().deleteFolder(
+              cubit.deleteFolder(
                     folder.id,
                     parentId: null, // Always delete folders at root level
                   );
