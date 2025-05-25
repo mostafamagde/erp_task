@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/routes/app_router.dart';
 import 'core/di/di.dart';
+import 'core/theme/theme_cubit.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/folder/data/repositories/folder_repository_impl.dart';
 import 'features/folder/presentation/cubit/folder_cubit.dart';
@@ -22,11 +23,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ERP Task',
-      theme: AppTheme.lightTheme,
-      onGenerateRoute: AppRouter.generateRoute,
-      debugShowCheckedModeBanner: false,
+    return BlocProvider(
+      create: (context) => ThemeCubit(),
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            title: 'ERP Task',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: state.themeMode,
+            onGenerateRoute: AppRouter.generateRoute,
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      ),
     );
   }
 }

@@ -22,6 +22,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/folder/presentation/pages/folder_page.dart';
+import '../../features/folder/presentation/pages/main_page.dart';
 
 class AppRouter {
   static const String login = '/';
@@ -75,14 +76,26 @@ class AppRouter {
 
       case folder:
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (context) => FolderCubit(
-              folderRepository: FolderRepositoryImpl(
-                firestore: FirebaseFirestore.instance,
+          builder: (_) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => FolderCubit(
+                  folderRepository: FolderRepositoryImpl(
+                    firestore: FirebaseFirestore.instance,
+                  ),
+                  userId: UserModel.instance.id ?? '',
+                )..loadFolders(),
               ),
-              userId: UserModel.instance.id ?? '',
-            )..loadFolders(),
-            child: const FolderPage(),
+              BlocProvider(
+                create: (context) => AuthCubit(
+                  authRepository: AuthRepositoryImpl(
+                    firebaseAuth: FirebaseAuth.instance,
+                    googleSignIn: GoogleSignIn(),
+                  ),
+                ),
+              ),
+            ],
+            child: const MainPage(),
           ),
         );
       case file:
