@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/file.dart';
 import '../../domain/repositories/file_repository.dart';
 
+@Injectable(as: FileRepository)
 class FileRepositoryImpl implements FileRepository {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;

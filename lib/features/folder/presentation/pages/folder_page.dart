@@ -113,7 +113,6 @@ class _FolderPageState extends State<FolderPage> {
               child: BlocBuilder<FolderCubit, FolderState>(
                 builder: (context, state) {
                   if (state is FolderLoading) {
-                    print('/////////////////////////////////////////////////////////////////////');
                     return const Center(child: CircularProgressIndicator());
                   }
 
@@ -185,7 +184,7 @@ class _FolderPageState extends State<FolderPage> {
           onTap: () {
             Navigator.pushNamed(
               context,
-              AppRouter.folder,
+              AppRouter.file,
               arguments: folder.id,
             );
           },

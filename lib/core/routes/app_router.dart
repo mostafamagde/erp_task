@@ -9,6 +9,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/file/presentation/pages/file_upload_page.dart';
+import '../../features/file/presentation/pages/files_page.dart';
 import '../../features/folder/data/repositories/folder_repository_impl.dart';
 import '../../features/folder/domain/repositories/folder_repository.dart';
 import '../../features/folder/presentation/cubit/folder_cubit.dart';
@@ -25,6 +27,8 @@ class AppRouter {
   static const String signup = '/signup';
   static const String forgotPassword = '/forgot-password';
   static const String folder = '/home';
+  static const String file = '/file';
+  static const String fileUpload = '/fileUpload';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -77,6 +81,28 @@ class AppRouter {
               userId: UserModel.instance.id ?? '',
             )..loadFolders(),
             child: const FolderPage(),
+          ),
+        );
+      case file:
+        final String folderId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => FileCubit(
+              fileRepository: FileRepositoryImpl(),
+              userId: UserModel.instance.id ?? '',
+            ),
+            child: FilesPage(folderId: folderId),
+          ),
+        );
+      case fileUpload:
+        final String folderId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => FileCubit(
+              fileRepository: FileRepositoryImpl(),
+              userId: UserModel.instance.id ?? '',
+            ),
+            child: FileUploadPage(folderId: folderId),
           ),
         );
 

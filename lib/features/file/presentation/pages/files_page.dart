@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
+import '../../../../core/routes/app_router.dart';
 import '../cubit/file_cubit.dart';
 import '../../domain/entities/file.dart';
 import '../pages/file_search_page.dart';
@@ -36,39 +37,53 @@ class _FilesPageState extends State<FilesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FileCubit, FileState>(
-      builder: (context, state) {
-        if (state is FileLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () => _showSearchDialog(context),
+            icon: const Icon(Icons.search),
+          ),
+          IconButton(
+            onPressed: () => Navigator.pushNamed(context, AppRouter.fileUpload, arguments: widget.folderId), // Pass folderId as an argument(,
+            icon: const Icon(Icons.upload_file),
+          ),
+        ],
+      ),
+      body: BlocBuilder<FileCubit, FileState>(
+        builder: (context, state) {
+          if (state is FileLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        if (state is FileError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(state.message),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.read<FileCubit>().loadFiles(widget.folderId),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (state is FilesLoaded) {
-          if (state.files.isEmpty) {
-            return const Center(
-              child: Text('No files in this folder'),
+          if (state is FileError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(state.message),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.read<FileCubit>().loadFiles(widget.folderId),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
             );
           }
-          return _buildFileList(context, state.files);
-        }
 
-        return const Center(child: Text('No files found'));
-      },
+          if (state is FilesLoaded) {
+            if (state.files.isEmpty) {
+              return const Center(
+                child: Text('No files in this folder'),
+              );
+            }
+            return _buildFileList(context, state.files);
+          }
+
+          return const Center(child: Text('No files found'));
+        },
+      ),
     );
   }
 
