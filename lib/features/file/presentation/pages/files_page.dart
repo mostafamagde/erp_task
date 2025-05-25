@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:erp_tassk/features/folder/presentation/cubit/folder_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,10 +25,7 @@ class _FilesPageState extends State<FilesPage> {
   @override
   void initState() {
     super.initState();
-    // Load files when the page is opened
-    context.read<FileCubit>().loadFiles(widget.folderId);
   }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -35,13 +33,14 @@ class _FilesPageState extends State<FilesPage> {
     context.read<FileCubit>().loadFiles(widget.folderId);
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
           IconButton(
-            onPressed: () => _showSearchDialog(context),
+            onPressed: () => Navigator.pushNamed(context, AppRouter.fileSearch),
             icon: const Icon(Icons.search),
           ),
           IconButton(
@@ -127,15 +126,15 @@ class _FilesPageState extends State<FilesPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  onPressed: () => _showVersionHistory(context, file),
+                  onPressed: () => _showVersionHistory(context, file,context.read<FileCubit>()),
                   icon: const Icon(Icons.history, color: Colors.blue),
                 ),
                 IconButton(
-                  onPressed: () => _showEditDialog(context, file),
+                  onPressed: () => _showEditDialog(context, file,context.read<FileCubit>()),
                   icon: const Icon(Icons.edit, color: Colors.blue),
                 ),
                 IconButton(
-                  onPressed: () => _showDeleteConfirmation(context, file),
+                  onPressed: () => _showDeleteConfirmation(context, file,context.read<FileCubit>()),
                   icon: const Icon(Icons.delete, color: Colors.red),
                 ),
               ],
@@ -195,7 +194,7 @@ class _FilesPageState extends State<FilesPage> {
   }
 
   Future<void> _showDeleteConfirmation(
-      BuildContext context, FileEntity file) async {
+      BuildContext context, FileEntity file ,FileCubit cubit) async {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -208,7 +207,7 @@ class _FilesPageState extends State<FilesPage> {
           ),
           TextButton(
             onPressed: () {
-              context.read<FileCubit>().deleteFile(file.id, widget.folderId);
+             cubit.deleteFile(file.id, widget.folderId);
               Navigator.pop(context);
             },
             child: const Text('Delete'),
@@ -254,7 +253,7 @@ class _FilesPageState extends State<FilesPage> {
     );
   }
 
-  Future<void> _showEditDialog(BuildContext context, FileEntity file) async {
+  Future<void> _showEditDialog(BuildContext context, FileEntity file,FileCubit cubit) async {
     final titleController = TextEditingController(text: file.title);
     final descriptionController = TextEditingController(text: file.description);
     final tagsController = TextEditingController(text: file.tags.join(', '));
@@ -308,11 +307,12 @@ class _FilesPageState extends State<FilesPage> {
                   .where((tag) => tag.isNotEmpty)
                   .toList();
 
-              context.read<FileCubit>().updateFile(
+              cubit.updateFile(
                     fileId: file.id,
                     title: titleController.text,
                     description: descriptionController.text,
                     tags: tags,
+                folderId:  widget.folderId
                   );
               Navigator.pop(context);
             },
@@ -323,7 +323,7 @@ class _FilesPageState extends State<FilesPage> {
     );
   }
 
-  Future<void> _showVersionHistory(BuildContext context, FileEntity file) async {
+  Future<void> _showVersionHistory(BuildContext context, FileEntity file, FileCubit cubit) async {
     final versions = await context.read<FileCubit>().getVersionHistory(file.id);
     
     if (!context.mounted) return;
@@ -353,7 +353,7 @@ class _FilesPageState extends State<FilesPage> {
                         icon: const Icon(Icons.visibility),
                       ),
                     IconButton(
-                      onPressed: () => _uploadNewVersion(context, file),
+                      onPressed: () => _uploadNewVersion(context, file,cubit),
                       icon: const Icon(Icons.upload_file),
                     ),
                   ],
@@ -372,7 +372,7 @@ class _FilesPageState extends State<FilesPage> {
     );
   }
 
-  Future<void> _uploadNewVersion(BuildContext context, FileEntity file) async {
+  Future<void> _uploadNewVersion(BuildContext context, FileEntity file, FileCubit cubit) async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -381,7 +381,7 @@ class _FilesPageState extends State<FilesPage> {
 
       if (result != null && context.mounted) {
         final newFile = File(result.files.single.path!);
-        await context.read<FileCubit>().uploadNewVersion(
+        await cubit.uploadNewVersion(
               fileId: file.id,
               file: newFile,
             );

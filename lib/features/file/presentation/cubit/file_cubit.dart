@@ -200,6 +200,7 @@ class FileCubit extends Cubit<FileState> {
     required String title,
     required String description,
     required List<String> tags,
+    required String folderId,
   }) async {
     try {
       emit(FileLoading());
@@ -210,12 +211,10 @@ class FileCubit extends Cubit<FileState> {
         description: description,
         tags: tags,
       );
-      // Get the folder ID from the current state
-      if (state is FilesLoaded) {
-        final files = (state as FilesLoaded).files;
-        final file = files.firstWhere((f) => f.id == fileId);
-        await loadFiles(file.folderId);
-      }
+
+
+        await loadFiles(folderId);
+
     } catch (e) {
       emit(FileError(e.toString()));
       // Reload files to maintain UI consistency

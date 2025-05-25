@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
+import '../../../../core/routes/app_router.dart';
 import '../cubit/file_cubit.dart';
 
 class FileUploadPage extends StatefulWidget {
@@ -86,7 +87,16 @@ class _FileUploadPageState extends State<FileUploadPage> {
             );
           } else if (state is FilesLoaded) {
             setState(() => _isLoading = false);
-            Navigator.pop(context);
+            int count = 0;
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRouter.file,
+              arguments: widget.folderId,
+                  (route) {
+                return count++ >= 2;
+              },
+            );
+
           }
         },
         child: SingleChildScrollView(

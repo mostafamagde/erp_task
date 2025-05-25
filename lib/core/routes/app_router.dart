@@ -9,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/file/presentation/pages/file_search_page.dart';
 import '../../features/file/presentation/pages/file_upload_page.dart';
 import '../../features/file/presentation/pages/files_page.dart';
 import '../../features/folder/data/repositories/folder_repository_impl.dart';
@@ -29,6 +30,7 @@ class AppRouter {
   static const String folder = '/home';
   static const String file = '/file';
   static const String fileUpload = '/fileUpload';
+  static const String fileSearch = '/fileSearch';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -90,7 +92,7 @@ class AppRouter {
             create: (context) => FileCubit(
               fileRepository: FileRepositoryImpl(),
               userId: UserModel.instance.id ?? '',
-            ),
+            )..loadFiles(folderId),
             child: FilesPage(folderId: folderId),
           ),
         );
@@ -103,6 +105,16 @@ class AppRouter {
               userId: UserModel.instance.id ?? '',
             ),
             child: FileUploadPage(folderId: folderId),
+          ),
+        );
+      case fileSearch:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => FileCubit(
+              fileRepository: FileRepositoryImpl(),
+              userId: UserModel.instance.id ?? '',
+            ),
+            child: FileSearchPage(),
           ),
         );
 

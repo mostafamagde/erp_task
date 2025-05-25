@@ -90,13 +90,7 @@ class _FolderPageState extends State<FolderPage> {
               onPressed: () => _showCreateFolderDialog(context,context.read<FolderCubit>()),
             ),
 
-          if (widget.parentId != null)
-            IconButton(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FileSearchPage())),
-                icon: Icon(Icons.search)),
+
 
           if (widget.parentId != null) // Only show upload button in folder view
             IconButton(
