@@ -146,6 +146,8 @@ class FileCubit extends Cubit<FileState> {
       await loadFiles(folderId);
     } catch (e) {
       emit(FileError(e.toString()));
+      // Reload files to maintain UI consistency
+      await loadFiles(folderId);
     }
   }
 
@@ -156,6 +158,8 @@ class FileCubit extends Cubit<FileState> {
       await loadFiles(folderId);
     } catch (e) {
       emit(FileError(e.toString()));
+      // Reload files to maintain UI consistency
+      await loadFiles(folderId);
     }
   }
 
@@ -206,11 +210,20 @@ class FileCubit extends Cubit<FileState> {
         description: description,
         tags: tags,
       );
-      // Reload files after update
-      final file = await _fileRepository.getFile(_userId, fileId);
-      await loadFiles(file.folderId);
+      // Get the folder ID from the current state
+      if (state is FilesLoaded) {
+        final files = (state as FilesLoaded).files;
+        final file = files.firstWhere((f) => f.id == fileId);
+        await loadFiles(file.folderId);
+      }
     } catch (e) {
       emit(FileError(e.toString()));
+      // Reload files to maintain UI consistency
+      if (state is FilesLoaded) {
+        final files = (state as FilesLoaded).files;
+        final file = files.firstWhere((f) => f.id == fileId);
+        await loadFiles(file.folderId);
+      }
     }
   }
 

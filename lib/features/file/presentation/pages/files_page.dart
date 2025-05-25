@@ -28,26 +28,47 @@ class _FilesPageState extends State<FilesPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload files when dependencies change (e.g., when returning from file upload)
+    context.read<FileCubit>().loadFiles(widget.folderId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocBuilder<FileCubit, FileState>(
+      builder: (context, state) {
+        if (state is FileLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      body: BlocBuilder<FileCubit, FileState>(
-        builder: (context, state) {
-          if (state is FileLoading) {
-            return const Center(child: CircularProgressIndicator());
+        if (state is FileError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(state.message),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.read<FileCubit>().loadFiles(widget.folderId),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (state is FilesLoaded) {
+          if (state.files.isEmpty) {
+            return const Center(
+              child: Text('No files in this folder'),
+            );
           }
+          return _buildFileList(context, state.files);
+        }
 
-          if (state is FileError) {
-            return Center(child: Text(state.message));
-          }
-
-          if (state is FilesLoaded) {
-            return _buildFileList(context, state.files);
-          }
-
-          return const Center(child: Text('No files found'));
-        },
-      ),
+        return const Center(child: Text('No files found'));
+      },
     );
   }
 

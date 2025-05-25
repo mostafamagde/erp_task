@@ -22,9 +22,21 @@ class _FolderPageState extends State<FolderPage> {
   bool _isSearching = false;
 
   @override
+  void initState() {
+    super.initState();
+
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
   }
 
   @override
@@ -75,7 +87,7 @@ class _FolderPageState extends State<FolderPage> {
               !_isSearching) // Only show create folder button when not searching
             IconButton(
               icon: const Icon(Icons.add),
-              onPressed: () => _showCreateFolderDialog(context),
+              onPressed: () => _showCreateFolderDialog(context,context.read<FolderCubit>()),
             ),
 
           if (widget.parentId != null)
@@ -101,11 +113,24 @@ class _FolderPageState extends State<FolderPage> {
               child: BlocBuilder<FolderCubit, FolderState>(
                 builder: (context, state) {
                   if (state is FolderLoading) {
+                    print('/////////////////////////////////////////////////////////////////////');
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   if (state is FolderError) {
-                    return Center(child: Text(state.message));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(state.message),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => context.read<FolderCubit>().loadFolders(parentId: widget.parentId),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
                   }
 
                   if (state is FoldersLoaded) {
@@ -160,8 +185,8 @@ class _FolderPageState extends State<FolderPage> {
           onTap: () {
             Navigator.pushNamed(
               context,
-              AppRouter.folder
-
+              AppRouter.folder,
+              arguments: folder.id,
             );
           },
         );
@@ -172,7 +197,7 @@ class _FolderPageState extends State<FolderPage> {
   void _handleMenuAction(BuildContext context, String action, Folder folder) {
     switch (action) {
       case 'edit':
-        _showEditFolderDialog(context, folder);
+        _showEditFolderDialog(context, folder,context.read<FolderCubit>());
         break;
       case 'delete':
         _showDeleteConfirmation(context, folder);
@@ -180,7 +205,7 @@ class _FolderPageState extends State<FolderPage> {
     }
   }
 
-  Future<void> _showCreateFolderDialog(BuildContext context) async {
+  Future<void> _showCreateFolderDialog(BuildContext context, FolderCubit cubit) async {
     final controller = TextEditingController();
     return showDialog(
       context: context,
@@ -200,7 +225,7 @@ class _FolderPageState extends State<FolderPage> {
           TextButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
-                context.read<FolderCubit>().createFolder(
+                cubit.createFolder(
                       controller.text,
                       parentId: null, // Always create folders at root level
                     );
@@ -215,7 +240,7 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   Future<void> _showEditFolderDialog(
-      BuildContext context, Folder folder) async {
+      BuildContext context, Folder folder,FolderCubit cubit) async {
     final controller = TextEditingController(text: folder.name);
     return showDialog(
       context: context,
@@ -235,7 +260,7 @@ class _FolderPageState extends State<FolderPage> {
           TextButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
-                context.read<FolderCubit>().updateFolder(
+               cubit.updateFolder(
                       folder.id,
                       controller.text,
                       parentId: null, // Always update folders at root level

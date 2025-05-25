@@ -89,6 +89,7 @@ class FolderCubit extends Cubit<FolderState> {
   Future<void> createFolder(String name, {String? parentId}) async {
     try {
       emit(FolderLoading());
+      print('55555555555555555555555555555555555555555555555555555555555555555555555');
       await _folderRepository.createFolder(
         userId: _userId,
         name: name,
@@ -97,6 +98,7 @@ class FolderCubit extends Cubit<FolderState> {
       await loadFolders(parentId: parentId);
     } catch (e) {
       emit(FolderError(e.toString()));
+      await loadFolders(parentId: parentId);
     }
   }
 
@@ -112,6 +114,7 @@ class FolderCubit extends Cubit<FolderState> {
       await loadFolders(parentId: parentId);
     } catch (e) {
       emit(FolderError(e.toString()));
+      await loadFolders(parentId: parentId);
     }
   }
 
@@ -122,6 +125,7 @@ class FolderCubit extends Cubit<FolderState> {
       await loadFolders(parentId: parentId);
     } catch (e) {
       emit(FolderError(e.toString()));
+      await loadFolders(parentId: parentId);
     }
   }
 
@@ -134,35 +138,36 @@ class FolderCubit extends Cubit<FolderState> {
         parentId: null,
       );
       
-      if (_currentSearchQuery != null) {
-        final filteredFolders = folders.where((folder) =>
-          folder.name.toLowerCase().contains(_currentSearchQuery!.toLowerCase())
-        ).toList();
-        emit(FoldersLoaded(filteredFolders, searchQuery: _currentSearchQuery));
-      } else {
-        emit(FoldersLoaded(folders));
-      }
+      final filteredFolders = (_currentSearchQuery != null && _currentSearchQuery!.isNotEmpty)
+          ? folders.where((folder) =>
+              folder.name.toLowerCase().contains(_currentSearchQuery!.toLowerCase()))
+              .toList()
+          : folders;
+
+      emit(FoldersLoaded(filteredFolders, searchQuery: _currentSearchQuery));
     } catch (e) {
       emit(FolderError(e.toString()));
+      // Reload folders to maintain UI consistency
+      await loadFolders(parentId: null);
     }
   }
 
-  Future<void> loadFolders({String? parentId}) async {
+  Future<void> loadFolders({String? parentId, String? userId}) async {
+
     try {
       emit(FolderLoading());
       final folders = await _folderRepository.getFolders(
-        userId: _userId,
+        userId: userId ?? _userId,
         parentId: parentId,
       );
       
-      if (_currentSearchQuery != null) {
-        final filteredFolders = folders.where((folder) =>
-          folder.name.toLowerCase().contains(_currentSearchQuery!.toLowerCase())
-        ).toList();
-        emit(FoldersLoaded(filteredFolders, searchQuery: _currentSearchQuery));
-      } else {
-        emit(FoldersLoaded(folders));
-      }
+      final filteredFolders = (_currentSearchQuery != null && _currentSearchQuery!.isNotEmpty)
+          ? folders.where((folder) =>
+              folder.name.toLowerCase().contains(_currentSearchQuery!.toLowerCase()))
+              .toList()
+          : folders;
+
+      emit(FoldersLoaded(filteredFolders, searchQuery: _currentSearchQuery));
     } catch (e) {
       emit(FolderError(e.toString()));
     }
